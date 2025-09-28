@@ -1,0 +1,86 @@
+Redux: a flexioble ''State Container'' for JS Apps that manages our application state in a single immutable state tree ''separately''. (not inside components)
+
+As long as it is js, we can use Redux with it. It is not tied to React. We can use it with Angular, Vue, Node, etc.in backend also.
+
+How redux store works?
+Action: An action is a plain js object that describes what happened. It must have a type property that indicates the type of action being performed. It can also have other properties to provide additional information about the action.
+Eg: {type: 'ADD_TODO', text: 'Build my first Redux app'}
+
+Dispatch: Dispatching an action is the process of sending an action to the Redux store. This is done using the dispatch function, which is provided by the store. When an action is dispatched, the store will call the reducer function with the current state and the action as arguments.
+Eg: store.dispatch({type: 'ADD_TODO', text: 'Build my first Redux app'})
+
+Reducer: A reducer is a pure function that takes the current state and an action as arguments, and returns a new state. The reducer is responsible for updating the state based on the action that was dispatched. It should not modify the current state directly, but instead return a new state object.
+Eg: function todoReducer(state = initialState, action) {
+      switch (action.type) {
+        case 'ADD_TODO':
+          return {
+            ...state,
+            todos: [...state.todos, { text: action.text, completed: false }]
+          };
+        default:
+          return state;
+      }
+    }
+
+Whenever an action is dispatched, the reducer function is called with the current state and action as arguments. It returns a new state based on the action type.
+
+reducer(action, state) => {return newState;} 
+here newState is immutable. We are not changing the existing state. We are creating a new state object.
+
+Store: The store is the central hub of a Redux application. It holds the current state of the application, allows access to the state via getState(), allows state to be updated via dispatch(action), and registers listeners via subscribe(listener). The store is created using the createStore function, which takes the reducer function as an argument.
+Eg: import { createStore } from 'redux';
+     const store = createStore(todoReducer);
+
+
+useSelector: A hook provided by react-redux to access the Redux store's state in a React component. It takes a selector function as an argument, which is called with the store state. The selector function should return the part of the state that the component needs.
+Eg: import { useSelector } from 'react-redux';
+     const todos = useSelector(state => state.todos);
+
+
+
+useDispatch: A hook provided by react-redux to get the dispatch function from the Redux store in a React component. It allows the component to dispatch actions to the store.
+Eg: import { useDispatch } from 'react-redux';
+     const dispatch = useDispatch();
+     dispatch({type: 'ADD_TODO', text: 'Build my first Redux app'});    
+
+
+Redux Toolkit: npm i @reduxjs/toolkit react-redux
+It is the official, opinionated, batteries-included toolset for efficient Redux development.
+
+
+Redux Dev Tools(extension): It is a browser extension that allows us to inspect the state of our Redux store, view the actions that have been dispatched, and time-travel through the state changes. It is a powerful tool for debugging and understanding how our application state changes over time.
+
+Redux Thunk: It is a middleware that allows us to write action creators that return a function instead of an action. This function can be used to perform asynchronous operations, such as fetching data from an API, before dispatching an action to the store. It is commonly used for handling side effects in Redux applications.
+npm i redux-thunk
+
+
+ExtraReducers: It is a way to handle actions that are not defined in the slice's reducers. It allows us to respond to actions defined outside of the slice, such as actions from other slices or external libraries. It is defined as a key-value pair, where the key is the action type and the value is a reducer function that takes the current state and action as arguments, and returns a new state.
+Eg: extraReducers: {
+      [someOtherAction.type]: (state, action) => {
+        // handle the action and return a new state
+      }
+    }
+
+    const postSlice = createSlice({
+    name: 'posts',
+    initialState,
+    extraReducers: (builder)=>{
+        builder.addCase(fetchPosts.pending, (state)=>{
+            state.isLoading = true;
+            state.isError = false;
+            state.error = '';
+        })
+        .addCase(fetchPosts.fulfilled, (state, action)=>{
+            state.isLoading = false;
+            state.posts = action.payload;
+        })
+        .addCase(fetchPosts.rejected, (state, action)=>{
+            state.isLoading = false;
+            state.isError = true;
+            state.error = action.error.message;
+        });
+    }
+})
+
+here fetchPosts is an async thunk action that we created using createAsyncThunk. It automatically generates pending, fulfilled, and rejected action types that we can handle in the extraReducers.
+
